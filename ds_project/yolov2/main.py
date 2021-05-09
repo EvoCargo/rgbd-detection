@@ -12,6 +12,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 from datasets import EPFLDataset
+from dataset_replace_channel import EPFLDataset_replace
 from transforms import Resize, Compose, HSVAdjust, VerticalFlip, Crop
 from loader import custom_collate_fn
 from train import train
@@ -43,11 +44,17 @@ def main():
     EPOCHS = 7
     IMG_SHAPE = (424, 512)
     FUSE = False
+    REPLACE = False
     imgs_path = "../data/epfl_lab/"
 
     aug = Compose([HSVAdjust(), VerticalFlip(), Crop(), Resize(IMG_SHAPE)])
 
-    dataset = EPFLDataset(imgs_path, bboxes_by_id)
+    if REPLACE:
+        dataset = EPFLDataset_replace(imgs_path, bboxes_by_id, replace=True)
+    else:
+        dataset = EPFLDataset(imgs_path, bboxes_by_id, fuse=FUSE)
+    
+
     loader = DataLoader(dataset, BATCH_SIZE, drop_last=True, shuffle=True, collate_fn=custom_collate_fn)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
